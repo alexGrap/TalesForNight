@@ -36,7 +36,6 @@ func InitTables() error {
     	genre TEXT NOT NULL,
     	sounder TEXT NOT NULL ,
     	book TEXT NOT NULL,
-    	format TEXT NOT NULL,
     	counter INT DEFAULT 0
 		);`)
 	if err != nil {
@@ -55,8 +54,8 @@ func DropTable() error {
 
 func CreateUser(body models.User) {
 	Connection.Database.QueryRowx(`INSERT INTO users
-	( userid, genre, sounder, book, format, counter)
-	VALUES ($1, $2, $3, $4, $5, $6)`, body.UserId, "Сказка", "Python", body.Book, "Текст", body.Counter)
+	( userid, genre, sounder, book, counter)
+	VALUES ($1, $2, $3, $4, $5)`, body.UserId, "Сказка", "Текст", body.Book, body.Counter)
 }
 
 func GetUser(userId int64) models.User {
@@ -86,14 +85,6 @@ func UpdateGenre(id int64, genre string) error {
 
 func UpdateBook(id int64, title string) error {
 	_, err := Connection.Database.Queryx("UPDATE users SET book = $1 WHERE userid = $2", title, id)
-	if err != nil {
-		log.Println(err)
-	}
-	return err
-}
-
-func UpdateFormat(id int64, format string) error {
-	_, err := Connection.Database.Queryx("UPDATE users SET format = $1 WHERE userid = $2", format, id)
 	if err != nil {
 		log.Println(err)
 	}

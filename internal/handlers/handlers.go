@@ -14,13 +14,12 @@ import (
 )
 
 var (
-	BaseSG      = fsm.NewStateGroup("base")
-	TaleState   = BaseSG.New("Tale")
-	SpeakState  = BaseSG.New("Speak")
-	GenreState  = BaseSG.New("Genre")
-	FormatState = BaseSG.New("Format")
-	OtherState  = BaseSG.New("Other")
-	AdminState  = BaseSG.New("Admin")
+	BaseSG     = fsm.NewStateGroup("base")
+	TaleState  = BaseSG.New("Tale")
+	SpeakState = BaseSG.New("Speak")
+	GenreState = BaseSG.New("Genre")
+	OtherState = BaseSG.New("Other")
+	AdminState = BaseSG.New("Admin")
 )
 
 func StartHandlers(bot *tele.Group, manager *fsm.Manager) {
@@ -37,25 +36,20 @@ func StartHandlers(bot *tele.Group, manager *fsm.Manager) {
 		keyboards.CancelBtn))
 	manager.Bind(&keyboards.GenreBtn, fsm.AnyState, onGenreChoose(keyboards.FairyBtn, keyboards.PoemBtn,
 		keyboards.DramaBtn, keyboards.CancelBtn))
-	manager.Bind(&keyboards.SpeechBtn, fsm.AnyState, onSpeechChoose(keyboards.PythonBtn, keyboards.YandexBtn,
+	manager.Bind(&keyboards.SpeechBtn, fsm.AnyState, onSpeechChoose(keyboards.TextBtn, keyboards.YandexBtn,
 		keyboards.CancelBtn))
 	manager.Bind(&keyboards.InfoBtn, fsm.AnyState, onInfoChoose(keyboards.GetSleepingInfoBtn,
 		keyboards.SleepingAdviceBtn, keyboards.CancelBtn))
-	manager.Bind(&keyboards.FormatBtn, fsm.AnyState, onFormatChoose(keyboards.AudioBtn, keyboards.TextBtn,
-		keyboards.CancelBtn))
 	manager.Bind(&keyboards.CancelBtn, fsm.AnyState, onCancelForm())
 	manager.Bind(&keyboards.UserBtn, fsm.AnyState, userInformation)
 
 	//// form
-	manager.Bind(&keyboards.PythonBtn, SpeakState, setSpeak("Python"))
+	manager.Bind(&keyboards.TextBtn, SpeakState, setSpeak("Текст"))
 	manager.Bind(&keyboards.YandexBtn, SpeakState, setSpeak("Yandex"))
 
 	manager.Bind(&keyboards.DramaBtn, GenreState, setGenre("Драма"))
 	manager.Bind(&keyboards.FairyBtn, GenreState, setGenre("Сказка"))
 	manager.Bind(&keyboards.PoemBtn, GenreState, setGenre("Поэма"))
-
-	manager.Bind(&keyboards.AudioBtn, FormatState, setFormat("Аудио"))
-	manager.Bind(&keyboards.TextBtn, FormatState, setFormat("Текст"))
 
 	manager.Bind(&keyboards.OurTaleBtn, TaleState, generateTail)
 	manager.Bind(&keyboards.OwnTaleBtn, TaleState, waitOwnState(keyboards.CancelBtn))
@@ -83,9 +77,9 @@ func onStart(c tele.Context) error {
 		"который бы искал подходящее произведение для каждого пользователя, и при желании делал бы из него аудиокнигу. Так " +
 		"как бОльшая часть литературы находится под действием авторского права, была использованна технология" +
 		" Chat GPT от OpenAi для демонстрации возможностей бота, а точнее для генерации случайного небольшого отрывка." +
-		"Для синтеза речи был выбран язык Python с имеющийся библиотекой для этого, а также разработка компании " +
+		"Для синтеза речи использованa разработка компании " +
 		"Яндекс - Yandex SpeechKit. Так как последняя технология предоставляется на коммерческой основе, количество " +
-		"пользований данной озвучкой текста ограниченно 5. Данные два способа были выбраны в демонстрационных целях, " +
+		"пользований данной озвучкой текста ограниченно 15 (для дополнительной тестровки - свяжитесь со мной, я обнулю). Данные два способа были выбраны в демонстрационных целях, " +
 		"и всегда могут быть заменены на аналоги, например на api \"Маруси\", доступ к которой предоставляется на той " +
 		"же основе, что и у Яндекса. Приятного пользования!\n\n Для ознакомления с функционалом рекомендуем /help")
 
@@ -93,9 +87,8 @@ func onStart(c tele.Context) error {
 
 func helper(c tele.Context) error {
 	return c.Send("Справка для пользователей 📃\n\nВ разделе \"Выбрать жанр 🖋\" Вы можете выбрать жанр произведения, которое будет сгенерированно" +
-		" случайным образом специально для Вас (по умолчанию \"Сказка\")\n\nВ разделе \"Задать озвучку 🎙\" Вы можете выбрать между неограниченной " +
-		"озвучкой Python или ограниченной 5ью запросами озвучкой Yandex SpeechKit (по умолчанию \"Python\")\n\nВ разделе \"Задать формат 📑\" " +
-		"Вы можете выбрать формат предоставляемого Вам произведения - текст или аудио (по умолчанию \"Текст\")\n\nВ " +
+		" случайным образом специально для Вас (по умолчанию \"Сказка\")\n\nВ разделе \"Задать озвучку 🎙\" Вы можете выбрать между " +
+		"текстом или ограниченной 5ью запросами озвучкой Yandex SpeechKit (по умолчанию \"Текст\")\n\nВ " +
 		"разделе \"Дополнительная информация 🕶\" Вы можете прочитать интересные факты о сне и рекомендации о том, как " +
 		"быстрее уснуть\n\nВ разделе \"Ваши настройки ⚙\" хранится информация о Ваших текущих установленных " +
 		"параметрах\n\nИ наконец, в разделе \"Найти скзаку 🔍\" Вы можете запросить случайно сгенерированный фрагмент" +
@@ -144,16 +137,6 @@ func onInfoChoose(info tele.Btn, advice tele.Btn, cancel tele.Btn) fsm.Handler {
 	}
 }
 
-func onFormatChoose(audio tele.Btn, text tele.Btn, cancel tele.Btn) fsm.Handler {
-	menu := &tele.ReplyMarkup{ResizeKeyboard: true}
-	menu.Reply(menu.Row(audio, text), menu.Row(cancel))
-	return func(c tele.Context, state fsm.FSMContext) error {
-		state.Set(FormatState)
-		return c.Send("Выберите формат Вашего произведения", menu)
-
-	}
-}
-
 func onCancelForm() fsm.Handler {
 	menu := keyboards.OnStartKB()
 	return func(c tele.Context, state fsm.FSMContext) error {
@@ -167,15 +150,7 @@ func setSpeak(speaker string) fsm.Handler {
 	menu := keyboards.OnStartKB()
 	return func(c tele.Context, state fsm.FSMContext) error {
 		repository.UpdateSounder(c.Sender().ID, speaker)
-		return c.Send(fmt.Sprintf("Установлен голос озвучки: %s", speaker), menu)
-	}
-}
-
-func setFormat(format string) fsm.Handler {
-	menu := keyboards.OnStartKB()
-	return func(c tele.Context, state fsm.FSMContext) error {
-		repository.UpdateFormat(c.Sender().ID, format)
-		return c.Send(fmt.Sprintf("Установлен формат произведения: %s", format), menu)
+		return c.Send(fmt.Sprintf("Установлен формат: %s", speaker), menu)
 	}
 }
 
@@ -251,8 +226,8 @@ func userInformation(c tele.Context, state fsm.FSMContext) error {
 	body := repository.GetUser(c.Sender().ID)
 	menu := keyboards.OnStartKB()
 	return c.Send(fmt.Sprintf("Информация о Вас: \n\nВаше имя 👦🏻: %s\nВыбранный жанр 🎭: %s\nВыбранная озвучка"+
-		" 🔊: %s\nВыбранная книга 📚: %s\nВыбранный формат: %s\nКоличество использований Yandex: %d/5",
-		c.Sender().FirstName, body.Genre, body.Sounder, body.Book, body.Format, body.Counter), menu)
+		" 🔊: %s\nВыбранная книга 📚: %s\nКоличество использований Yandex: %d/5",
+		c.Sender().FirstName, body.Genre, body.Sounder, body.Book, body.Counter), menu)
 }
 
 func sendInfo(c tele.Context, state fsm.FSMContext) error {

@@ -9,35 +9,9 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"path"
-	"strings"
 	"time"
 )
-
-func pythonGenerate() {
-	path, _ := os.Getwd()
-	cmd := exec.Command("python", path+"/pythonScript/main/main")
-	err := cmd.Run()
-	if err != nil {
-		log.Println("Cannot start the command: ", err)
-	}
-}
-
-func fileWritter(text string) {
-	path, _ := os.Getwd()
-	file, err := os.Create(path + "/temp-folder/text.txt")
-
-	if err != nil {
-		log.Println("Unable to create file:", err)
-	}
-	defer file.Close()
-	resultArr := strings.Split(text, "\n")
-	for i := 0; i < len(resultArr); i++ {
-		file.WriteString(resultArr[i])
-	}
-
-}
 
 func GenerateTale(text string, body models.User) string {
 	var result string
@@ -61,19 +35,13 @@ func GenerateTale(text string, body models.User) string {
 	}
 
 	result = resp.Choices[0].Message.Content
-	if body.Format == "Аудио" {
-		if body.Sounder == "Python" {
-			fileWritter(result)
-			pythonGenerate()
-			return "."
-		} else {
-			repository.UpdateCounter(body.UserId, 1)
-			if body.Counter+1 > 5 {
-				return "Простите, но Вы превысили количество запросов к Yandex SpeechKit."
-			}
-			yandexGenerate(result)
-			return "."
+	if body.Sounder == "Yandex" {
+		repository.UpdateCounter(body.UserId, 1)
+		if body.Counter+1 > 15 {
+			return "Простите, но Вы превысили количество запросов к Yandex SpeechKit."
 		}
+		yandexGenerate(result)
+		return "."
 
 	}
 	return result
