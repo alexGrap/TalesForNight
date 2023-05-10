@@ -5,6 +5,5 @@ type User struct {
 	Genre   string `json:"genre"`
 	Sounder string `json:"sounder"`
 	Book    string `json:"book"`
-	Format  string `json:"format"`
 	Counter int    `json:"counter"`
 }

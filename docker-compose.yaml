@@ -1,0 +1,24 @@
+services:
+  bot:
+    restart: unless-stopped
+    container_name: vk_telebot
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: go run /app/cmd/main.go
+    network_mode: "host"
+  bot_db:
+    image: postgres:latest
+    env_file:
+      - ./.env
+    volumes:
+      - ./migrations/auth_go.sql:/docker-entrypoint-initdb.d/auth_go.sql
+      - ./database/auth_go:/var/lib/postgresql/data
+    container_name: vk_telebot_db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DATABASE}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    restart: unless-stopped

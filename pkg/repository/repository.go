@@ -123,7 +123,7 @@ func GetAdminInfo() (int, int) {
 		log.Println(err)
 	}
 	for rows.Next() {
-		if err := rows.Scan(&tmp.UserId, &tmp.Genre, &tmp.Sounder, &tmp.Book, &tmp.Format, &tmp.Counter); err != nil {
+		if err := rows.Scan(&tmp.UserId, &tmp.Genre, &tmp.Sounder, &tmp.Book, &tmp.Counter); err != nil {
 			log.Println(err)
 		}
 		yandexCount += tmp.Counter
@@ -142,7 +142,7 @@ func GetAllId(flag bool) []int64 {
 		log.Println(err)
 	}
 	for rows.Next() {
-		if err := rows.Scan(&tmp.UserId, &tmp.Genre, &tmp.Sounder, &tmp.Book, &tmp.Format, &tmp.Counter); err != nil {
+		if err := rows.Scan(&tmp.UserId, &tmp.Genre, &tmp.Sounder, &tmp.Book, &tmp.Counter); err != nil {
 			log.Println(err)
 		}
 		result = append(result, tmp.UserId)
