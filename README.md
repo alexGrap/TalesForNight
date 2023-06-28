@@ -16,3 +16,6 @@
 ## Демонстрация
 Чтобы "потрогать" бота и ознакомится с его функционалом, перейдите по ссылке: <a href="https://t.me/vkTales_bot">Бот<a/>.<br/>
 На данный момент функционирование бота приостановлено. Примеры его использования приведены ниже:
+![Image alt](https://github.com/alexGrap/TalesForNight/blob/main/demoPhoto/1.png)
+![Image alt](https://github.com/alexGrap/TalesForNight/blob/main/demoPhoto/2.png)
+![Image alt](https://github.com/alexGrap/TalesForNight/blob/main/demoPhoto/3.png)
